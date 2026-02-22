@@ -78,12 +78,12 @@ pip install -r requirements.txt
 
 ## Uso
 
-### Gerar todos os datasets de uma vez ou cada um por vez (demoram mais ou menos 15 min. cada um)
+### Gerar todos os datasets 
 ```bash
 bash setup_and_run.sh
 ```
 
-### Gerar um cenário específico
+### Gerar um cenário específico (demoram mais ou menos 15 min. cada um)
 ```bash
 python simulation/tokyo_qkd_simulation.py --fault normal   --output dataset/data/dataset_normal.csv
 python simulation/tokyo_qkd_simulation.py --fault qber     --output dataset/data/dataset_qber.csv
