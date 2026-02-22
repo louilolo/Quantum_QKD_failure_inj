@@ -1,0 +1,201 @@
+{
+  "metadata": {
+    "description": "Tokyo QKD Network topology — baseado em Sasaki et al. (2011)",
+    "reference": "M. Sasaki et al., 'Field test of quantum key distribution in the Tokyo QKD Network', Optics Express, 2011",
+    "total_distance_km": 30.2,
+    "wavelength_nm": 1290,
+    "fiber_type": "SMF-28 ULL (O-band, minimiza SpRS do tráfego clássico coexistente)",
+
+    "hardware_params": {
+      "detector": {
+        "type": "SSPD",
+        "efficiency": 0.80,
+        "dark_count_rate_per_s": 100,
+        "time_resolution_ps": 100,
+        "count_rate_max_hz": 50e6
+      },
+      "memory": {
+        "type": "Er ions in solids",
+        "coherence_time_s": 1.3,
+        "efficiency": 0.75,
+        "frequency_hz": 2000,
+        "cooperativity_range": [50, 500]
+      },
+      "laser": {
+        "mean_photon_num": 0.1,
+        "clock_rate_ghz": 1.25,
+        "tdm_frame_ns": 20
+      }
+    },
+
+    "protocol": {
+      "type": "BB84_DecoyState",
+      "qber_threshold_alert": 0.05,
+      "sifting_basis_ratio": 0.5,
+      "decoy_intensities": {
+        "signal_mu": 0.6,
+        "decoy1_nu": 0.1,
+        "decoy2_omega": 0.0
+      },
+      "error_correction": "Cascade",
+      "privacy_amplification": "Toeplitz"
+    },
+
+    "simulation": {
+      "duration_ps": 1e12,
+      "sample_interval_ps": 1e10,
+      "fault_start_ps": 5e11,
+      "logging": {
+        "qber_per_link": true,
+        "key_rate_sifted": true,
+        "key_rate_final": true,
+        "detection_counts": true,
+        "buffer_level": true,
+        "rerouting_events": true
+      }
+    },
+
+    "fault_scenarios": [
+      {
+        "id": "attack_qber_spike",
+        "target_link": "Koganei_B_Otemachi",
+        "type": "intercept_resend",
+        "qber_target": 0.25,
+        "note": "Tokyo QKD mediu QBER 2.40% → 49.70% sob ataque real"
+      },
+      {
+        "id": "gradual_degradation",
+        "target_link": "Koganei_A_Koganei_B",
+        "type": "attenuation_increase",
+        "attenuation_multiplier": 3.0,
+        "note": "Simula variação térmica/mecânica em fibras aéreas (50% da rede Tokyo QKD)"
+      },
+      {
+        "id": "node_failure",
+        "target_node": "Hakusan",
+        "type": "trusted_node_failure",
+        "note": "KMS do Tokyo QKD demonstrou rerouting automático sob falha de nó"
+      },
+      {
+        "id": "buffer_starvation",
+        "target_node": "Otemachi",
+        "type": "consumption_rate_increase",
+        "consumption_multiplier": 5.0,
+        "note": "Sistema cai de OTP para AES quando buffer esgota (Tokyo QKD fallback)"
+      },
+      {
+        "id": "blinding_attack",
+        "target_node": "Otemachi",
+        "start_time_ps": 5e11,
+        "type": "detector_blinding",
+        "detector_efficiency_target": 1.0,
+        "dark_count_rate_target": 5000000,
+        "note": "Eve injeta luz CW intensa (~mW) no detector de Bob saturando-o em modo linear. QBER permanece normal. Assinatura: dark_count_rate e detection_count absolutos.",
+        "detection_features": ["dark_count_rate", "detector_efficiency", "detection_count"],
+        "warning": "NAO detectavel via QBER — requer monitoramento de contagens absolutas"
+      },
+      {
+        "id": "trojan_horse",
+        "target_node": "Koganei_B",
+        "start_time_ps": 5e11,
+        "type": "back_reflection_power",
+        "back_reflection_power_W": 1e-3,
+        "normal_back_reflection_W": 1e-15,
+        "note": "Eve envia pulsos intensos no sentido reverso do canal quantico para iluminar o modulador de fase de Alice. QBER inalterado. Detectavel via monitor de potencia optica unidirecional.",
+        "detection_features": ["back_reflection_power", "phase_error_rate"],
+        "threshold_alert_W": 1e-6
+      }
+    ],
+
+    "classical_rtt_ms": {
+      "note": "Medido no Tokyo QKD Network entre sites",
+      "range": [0.79, 6.755]
+    }
+  },
+
+  "nodes": [
+    {
+      "name": "Koganei_A",
+      "type": "QKDNode",
+      "memo_size": 50
+    },
+    {
+      "name": "Koganei_B",
+      "type": "QKDNode",
+      "memo_size": 50
+    },
+    {
+      "name": "Otemachi",
+      "type": "QKDNode",
+      "memo_size": 100
+    },
+    {
+      "name": "Hakusan",
+      "type": "QKDNode",
+      "memo_size": 100
+    },
+    {
+      "name": "Hongo",
+      "type": "QKDNode",
+      "memo_size": 50
+    }
+  ],
+  "quantum_connections": [
+    {
+      "node1": "Koganei_A",
+      "node2": "Koganei_B",
+      "attenuation": 0.0002,
+      "distance": 7000
+    },
+    {
+      "node1": "Koganei_B",
+      "node2": "Otemachi",
+      "attenuation": 0.0002,
+      "distance": 13000
+    },
+    {
+      "node1": "Otemachi",
+      "node2": "Hakusan",
+      "attenuation": 0.0002,
+      "distance": 6000
+    },
+    {
+      "node1": "Hakusan",
+      "node2": "Hongo",
+      "attenuation": 0.0002,
+      "distance": 4200
+    }
+  ],
+  "classical_connections": [
+    {
+      "node1": "Koganei_A",
+      "node2": "Koganei_B",
+      "delay": 35000000,
+      "distance": 7000
+    },
+    {
+      "node1": "Koganei_B",
+      "node2": "Otemachi",
+      "delay": 65000000,
+      "distance": 13000
+    },
+    {
+      "node1": "Koganei_A",
+      "node2": "Otemachi",
+      "delay": 100000000,
+      "distance": 20000
+    },
+    {
+      "node1": "Otemachi",
+      "node2": "Hakusan",
+      "delay": 30000000,
+      "distance": 6000
+    },
+    {
+      "node1": "Hakusan",
+      "node2": "Hongo",
+      "delay": 21000000,
+      "distance": 4200
+    }
+  ]
+}
