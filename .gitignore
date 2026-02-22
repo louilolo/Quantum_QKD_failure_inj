@@ -1,0 +1,31 @@
+# Virtual environment
+venv_qkd/
+venv/
+.venv/
+env/
+
+# Dataset gerado — arquivos grandes, regeneráveis pelo script
+dataset/data/*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
